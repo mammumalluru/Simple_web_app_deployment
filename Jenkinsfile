@@ -43,7 +43,7 @@ pipeline {
 
     post {
         success {
-            echo "Open: http://$(curl -s ifconfig.me)/"
+            echo "build success"
         }
     }
 }
