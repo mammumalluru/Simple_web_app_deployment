@@ -19,6 +19,8 @@ sudo systemctl enable --now nginx
 echo "<h1>Welcome to your web app Mamatha</h1>" | sudo tee /var/www/html/index.html
 sudo systemctl restart nginx
 
+jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/systemctl restart nginx, /bin/systemctl start nginx
+
 # Install Jenkins via WAR (bypasses broken repo)
 sudo mkdir -p /opt/jenkins
 cd /opt/jenkins
