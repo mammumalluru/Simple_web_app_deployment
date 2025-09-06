@@ -1,6 +1,7 @@
 pipeline {
     agent any
 
+    // Parameter to pass name
     parameters {
         string(name: 'NAME', defaultValue: 'Mamatha', description: 'Your name to show on the web page')
     }
@@ -12,48 +13,33 @@ pipeline {
             }
         }
 
-        stage('Build page') {
+        stage('Build HTML page') {
             steps {
+                // Create a temporary HTML file
                 sh """
-                    # Remove old file if exists
-                    sudo rm -f /var/www/html/index.html
-
-                    # Create simple HTML page
-                    cat > /var/www/html/index.html <<EOL
-<html>
-  <body>
-    Hello, ${params.NAME}
-  </body>
-</html>
-EOL
+                    echo '<html><body>Hello, ${params.NAME}</body></html>' > /tmp/index.html
                 """
             }
         }
 
         stage('Deploy to Nginx') {
             steps {
-                script {
-                    sh """
-                        if [ -f "/var/www/html/index.html" ]; then
-                            echo ":page_facing_up: Found index.html"
-                            sudo systemctl restart nginx
-                            echo ":white_check_mark: Deployed: Welcome to your web app ${params.NAME}"
-                        else
-                            echo ":x: index.html not found!"
-                            exit 1
-                        fi
-                    """
-                }
+                sh """
+                    # Copy to Nginx directory and restart service
+                    sudo cp /tmp/index.html /var/www/html/index.html
+                    sudo systemctl restart nginx
+                """
             }
         }
     }
 
     post {
         success {
-            echo "Build and deployment successful!"
+            // Print public IP of the server
+            echo "Open your page at: http://$(curl -s ifconfig.me)/"
         }
         failure {
-            echo "Build or deployment failed!"
+            echo "Pipeline failed. Check logs for errors."
         }
     }
 }
