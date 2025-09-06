@@ -32,7 +32,7 @@ pipeline {
                         echo ":page_facing_up: Found index.html"
                         sudo cp index.html /var/www/html/
                         sudo systemctl restart nginx
-                        echo ":white_check_mark: Deployed: Welcome to your web app ooosssuuu"
+                        echo ":white_check_mark: Deployed: Welcome to your web app "
                     else
                         echo ":x: index.html not found!"
                         exit 1
