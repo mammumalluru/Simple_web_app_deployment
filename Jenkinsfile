@@ -6,14 +6,14 @@ pipeline {
   }
 
   stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
-    }
+        stage('Checkout') {
+            steps {
+            checkout scm
+            }
+        }
 
     
-    stage('Build page') {
+        stage('Build page') {
             steps {
                 sh """
                     # Remove old file if exists
@@ -29,32 +29,39 @@ pipeline {
                     EOL
                 """
             }
-    }
+    
     
 
-    stage('Deploy to Nginx') {
-        steps {
-            script {
-                sh '''
-                    if [ -f "index.html" ]; then
-                        echo ":page_facing_up: Found index.html"
-                        sudo cp index.html /var/www/html/
-                        sudo systemctl restart nginx
-                        echo ":white_check_mark: Deployed: Welcome to your web app Mamatha"
-                    else
-                        echo ":x: index.html not found!"
-                        exit 1
-                    fi
-                '''
+        stage('Deploy to Nginx') {
+            steps {
+                script {
+                    sh """
+                        if [ -f "index.html" ]; then
+                            echo ":page_facing_up: Found index.html"
+                            sudo cp index.html /var/www/html/
+                            sudo systemctl restart nginx
+                            echo ":white_check_mark: Deployed: Welcome to your web app Mamatha"
+                        else
+                            echo ":x: index.html not found!"
+                            exit 1
+                        fi
+                    """
+                }
+            }
+        }
+
+        post {
+            success {
+                echo "build success"
             }
         }
     }
 
-    post {
-        success {
-            echo "build success"
-        }
-    }
 }
+
+}
+
+
+
 
 
