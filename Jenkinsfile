@@ -1,45 +1,58 @@
 pipeline {
     agent any
-
-    // Parameter to pass name
-    parameters {
-        string(name: 'NAME', defaultValue: 'Mamatha', description: 'Your name to show on the web page')
+    environment {
+        NGINX_PATH = '/var/www/html'  // Ubuntu lo Nginx default path
+   }
+    triggers {
+        GenericTrigger(
+            genericVariables: [
+                [key: 'ref', value: '$.ref']
+            ],
+            causeString: 'Triggered by GitHub push',
+            token: 'deploy-webapp',
+            printContributedVariables: true,
+            printPostContent: true
+        )
     }
-
     stages {
-        stage('Checkout') {
+        stage('Pull Code') {
             steps {
-                checkout scm
+                script {
+                    echo ":mag: Pulling latest code..."
+                    git branch: 'main',
+                         url: 'https://github.com/mammumalluru/Simple_web_app_deployment.git'
+                }
             }
         }
-
-        stage('Build HTML page') {
-            steps {
-                // Create a temporary HTML file
-                sh """
-                    echo '<html><body>Hello, ${params.NAME}</body></html>' > /tmp/index.html
-                """
-            }
-        }
-
-        stage('Deploy to Nginx') {
-            steps {
-                sh """
-                    # Copy to Nginx directory and restart service
-                    sudo cp /tmp/index.html /var/www/html/index.html
-                    sudo systemctl restart nginx
-                """
+    stage('Deploy to Nginx') {
+        steps {
+            script {
+                sh '''
+                    if [ -f "index.html" ]; then
+                        echo ":page_facing_up: Found index.html"
+                        sudo cp index.html /var/www/html/
+                        sudo systemctl restart nginx
+                        echo ":white_check_mark: Deployed: Welcome to your web app Mamatha"
+                    else
+                        echo ":x: index.html not found!"
+                        exit 1
+                    fi
+                '''
             }
         }
     }
-
+        stage('Verify Nginx') {
+            steps {
+                sh 'sudo systemctl is-active --quiet nginx || sudo systemctl start nginx'
+            }
+        }
+    }
     post {
         success {
-            // Print public IP of the server
-            echo "pipeline success"
+            echo ":tada: SUCCESS: Deployment completed!"
         }
         failure {
-            echo "Pipeline failed. Check logs for errors."
+            echo ":x: FAILED: Deployment failed!"
         }
     }
 }
