@@ -36,7 +36,7 @@ pipeline {
     post {
         success {
             // Print public IP of the server
-            echo "Open your page at: http://$(curl -s ifconfig.me)/"
+            echo "pipeline success"
         }
         failure {
             echo "Pipeline failed. Check logs for errors."
